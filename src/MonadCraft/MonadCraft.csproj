@@ -1,0 +1,31 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFrameworks>net9.0;net8.0</TargetFrameworks>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+    </PropertyGroup>
+    
+    <PropertyGroup>
+        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+
+        <PackageId>MonadCraft</PackageId>
+        <Version>0.10.0</Version>
+        <Authors>Hayden Quinn</Authors>
+        <Company>hquinn</Company>
+        <Description>A modern lightweight library for common monad types</Description>
+        <PackageTags>monad;functional;result;option;railway</PackageTags>
+
+        <PackageLicenseExpression>MIT</PackageLicenseExpression>
+
+        <PackageProjectUrl>https://github.com/hquinn/MonadCraft</PackageProjectUrl>
+        <RepositoryUrl>https://github.com/hquinn/MonadCraft.git</RepositoryUrl>
+        <RepositoryType>git</RepositoryType>
+        <PackageReadmeFile>README.md</PackageReadmeFile>
+    </PropertyGroup>
+    
+    <ItemGroup>
+        <None Include="../../README.md" Pack="true" PackagePath="\" />
+    </ItemGroup>
+
+</Project>
