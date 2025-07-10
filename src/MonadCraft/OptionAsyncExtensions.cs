@@ -26,7 +26,7 @@ public static class OptionAsyncExtensions
         Func<Task<TOutput>> none)
     {
         var optional = await optionalTask.ConfigureAwait(false);
-        return await optional.MatchAsync(some, none);
+        return await optional.MatchAsync(some, none).ConfigureAwait(false);
     }
 
     /// <summary>
@@ -48,7 +48,7 @@ public static class OptionAsyncExtensions
         Func<TValue, Task<TNewValue>> mapFunc)
     {
         var optional = await optionalTask.ConfigureAwait(false);
-        return await optional.MapAsync(mapFunc);
+        return await optional.MapAsync(mapFunc).ConfigureAwait(false);
     }
 
     /// <summary>
@@ -70,7 +70,7 @@ public static class OptionAsyncExtensions
         Func<TValue, Task<Optional<TNewValue>>> bindFunc)
     {
         var optional = await optionalTask.ConfigureAwait(false);
-        return await optional.BindAsync(bindFunc);
+        return await optional.BindAsync(bindFunc).ConfigureAwait(false);
     }
 
     /// <summary>
