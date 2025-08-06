@@ -10,7 +10,7 @@
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 
         <PackageId>MonadCraft</PackageId>
-        <Version>0.11.0</Version>
+        <Version>0.12.0</Version>
         <Authors>Hayden Quinn</Authors>
         <Company>hquinn</Company>
         <Description>A modern lightweight library for common monad types</Description>
