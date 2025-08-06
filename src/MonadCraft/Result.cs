@@ -231,6 +231,28 @@ public readonly record struct Result<TError, TValue>
     }
 
     /// <summary>
+    /// Asynchronously performs a side-effect action based on if the Result is either a 'Success' or 'Failure'.
+    /// </summary>
+    /// <returns>The original, unchanged Result.</returns>
+    public async Task<Result<TError, TValue>> SwitchAsync(Action<TValue> onSuccess, Func<TError, Task> onFailure)
+    {
+        if (IsSuccess) onSuccess(Value);
+        else await onFailure(Error).ConfigureAwait(false);
+        return this;
+    }
+
+    /// <summary>
+    /// Asynchronously performs a side-effect action based on if the Result is either a 'Success' or 'Failure'.
+    /// </summary>
+    /// <returns>The original, unchanged Result.</returns>
+    public async Task<Result<TError, TValue>> SwitchAsync(Func<TValue, Task> onSuccess, Action<TError> onFailure)
+    {
+        if (IsSuccess) await onSuccess(Value).ConfigureAwait(false);
+        else onFailure(Error);
+        return this;
+    }
+
+    /// <summary>
     /// Gets the 'Success' value or returns the provided fallback value if it's a 'Failure'.
     /// </summary>
     public TValue GetValueOrDefault(TValue fallback)

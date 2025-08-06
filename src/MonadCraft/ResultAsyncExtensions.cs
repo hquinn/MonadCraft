@@ -174,4 +174,30 @@ public static class ResultAsyncExtensions
         var result = await resultTask.ConfigureAwait(false);
         return await result.SwitchAsync(onSuccess, onFailure).ConfigureAwait(false);
     }
+
+    /// <summary>
+    /// Asynchronously performs a side-effect action based on if the Result is either a 'Success' or 'Failure'.
+    /// </summary>
+    /// <returns>The original, unchanged Result.</returns>
+    public static async Task<Result<TError, TValue>> SwitchAsync<TError, TValue>(
+        this Task<Result<TError, TValue>> resultTask,
+        Action<TValue> onSuccess,
+        Func<TError, Task> onFailure)
+    {
+        var result = await resultTask.ConfigureAwait(false);
+        return await result.SwitchAsync(onSuccess, onFailure).ConfigureAwait(false);
+    }
+
+    /// <summary>
+    /// Asynchronously performs a side-effect action based on if the Result is either a 'Success' or 'Failure'.
+    /// </summary>
+    /// <returns>The original, unchanged Result.</returns>
+    public static async Task<Result<TError, TValue>> SwitchAsync<TError, TValue>(
+        this Task<Result<TError, TValue>> resultTask,
+        Func<TValue, Task> onSuccess,
+        Action<TError> onFailure)
+    {
+        var result = await resultTask.ConfigureAwait(false);
+        return await result.SwitchAsync(onSuccess, onFailure).ConfigureAwait(false);
+    }
 }
