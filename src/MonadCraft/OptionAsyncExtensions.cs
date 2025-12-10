@@ -1,12 +1,12 @@
 namespace MonadCraft;
 
 /// <summary>
-/// Provides extension methods for working with <see cref="Task{Optional}"/> objects.
+///     Provides extension methods for working with <see cref="Task{Optional}" /> objects.
 /// </summary>
 public static class OptionAsyncExtensions
 {
     /// <summary>
-    /// Asynchronously transforms the Option by applying either the 'some' or 'none' function.
+    ///     Asynchronously transforms the Option by applying either the 'some' or 'none' function.
     /// </summary>
     public static async Task<TOutput> MatchAsync<TValue, TOutput>(
         this Task<Optional<TValue>> optionalTask,
@@ -16,9 +16,9 @@ public static class OptionAsyncExtensions
         var optional = await optionalTask.ConfigureAwait(false);
         return optional.Match(some, none);
     }
-    
+
     /// <summary>
-    /// Asynchronously transforms the Option by applying either the 'some' or 'none' function.
+    ///     Asynchronously transforms the Option by applying either the 'some' or 'none' function.
     /// </summary>
     public static async Task<TOutput> MatchAsync<TValue, TOutput>(
         this Task<Optional<TValue>> optionalTask,
@@ -30,7 +30,7 @@ public static class OptionAsyncExtensions
     }
 
     /// <summary>
-    /// Asynchronously transforms the contained value into a new type, returning a new Option.
+    ///     Asynchronously transforms the contained value into a new type, returning a new Option.
     /// </summary>
     public static async Task<Optional<TNewValue>> MapAsync<TValue, TNewValue>(
         this Task<Optional<TValue>> optionalTask,
@@ -41,7 +41,7 @@ public static class OptionAsyncExtensions
     }
 
     /// <summary>
-    /// Asynchronously transforms the contained value into a new type, returning a new Option.
+    ///     Asynchronously transforms the contained value into a new type, returning a new Option.
     /// </summary>
     public static async Task<Optional<TNewValue>> MapAsync<TValue, TNewValue>(
         this Task<Optional<TValue>> optionalTask,
@@ -52,7 +52,7 @@ public static class OptionAsyncExtensions
     }
 
     /// <summary>
-    /// Asynchronously chains an operation that itself returns a Task of an Option.
+    ///     Asynchronously chains an operation that itself returns a Task of an Option.
     /// </summary>
     public static async Task<Optional<TNewValue>> BindAsync<TValue, TNewValue>(
         this Task<Optional<TValue>> optionalTask,
@@ -63,7 +63,7 @@ public static class OptionAsyncExtensions
     }
 
     /// <summary>
-    /// Asynchronously chains an operation that itself returns a Task of an Option.
+    ///     Asynchronously chains an operation that itself returns a Task of an Option.
     /// </summary>
     public static async Task<Optional<TNewValue>> BindAsync<TValue, TNewValue>(
         this Task<Optional<TValue>> optionalTask,
@@ -74,7 +74,43 @@ public static class OptionAsyncExtensions
     }
 
     /// <summary>
-    /// Asynchronously performs a side-effect action if the Option is Some.
+    ///     Returns the original Option task if it yields Some; otherwise, returns the provided fallback Option.
+    /// </summary>
+    public static async Task<Optional<TValue>> OrElseAsync<TValue>(
+        this Task<Optional<TValue>> optionalTask,
+        Optional<TValue> fallback)
+    {
+        var optional = await optionalTask.ConfigureAwait(false);
+        return optional.OrElse(fallback);
+    }
+
+    /// <summary>
+    ///     Returns the original Option task if it yields Some; otherwise, evaluates and returns the fallback Option.
+    /// </summary>
+    public static async Task<Optional<TValue>> OrElseAsync<TValue>(
+        this Task<Optional<TValue>> optionalTask,
+        Func<Optional<TValue>> fallbackFactory)
+    {
+        var optional = await optionalTask.ConfigureAwait(false);
+        return optional.OrElse(fallbackFactory);
+    }
+
+    /// <summary>
+    ///     Returns the original Option task if it yields Some; otherwise, awaits and returns the fallback Option task.
+    /// </summary>
+    public static async Task<Optional<TValue>> OrElseAsync<TValue>(
+        this Task<Optional<TValue>> optionalTask,
+        Func<Task<Optional<TValue>>> fallbackFactory)
+    {
+        var optional = await optionalTask.ConfigureAwait(false);
+        if (optional.IsSome) return optional;
+
+        var fallback = await fallbackFactory().ConfigureAwait(false);
+        return fallback;
+    }
+
+    /// <summary>
+    ///     Asynchronously performs a side-effect action if the Option is Some.
     /// </summary>
     public static async Task<Optional<TValue>> OnSomeAsync<TValue>(
         this Task<Optional<TValue>> optionalTask,
@@ -85,7 +121,7 @@ public static class OptionAsyncExtensions
     }
 
     /// <summary>
-    /// Asynchronously performs a side-effect action if the Option is Some.
+    ///     Asynchronously performs a side-effect action if the Option is Some.
     /// </summary>
     public static async Task<Optional<TValue>> OnSomeAsync<TValue>(
         this Task<Optional<TValue>> optionalTask,
@@ -96,7 +132,7 @@ public static class OptionAsyncExtensions
     }
 
     /// <summary>
-    /// Asynchronously performs a side-effect action if the Option is None.
+    ///     Asynchronously performs a side-effect action if the Option is None.
     /// </summary>
     public static async Task<Optional<TValue>> OnNoneAsync<TValue>(
         this Task<Optional<TValue>> optionalTask,
@@ -107,7 +143,7 @@ public static class OptionAsyncExtensions
     }
 
     /// <summary>
-    /// Asynchronously performs a side-effect action if the Option is None.
+    ///     Asynchronously performs a side-effect action if the Option is None.
     /// </summary>
     public static async Task<Optional<TValue>> OnNoneAsync<TValue>(
         this Task<Optional<TValue>> optionalTask,

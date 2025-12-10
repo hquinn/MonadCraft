@@ -1,12 +1,12 @@
 namespace MonadCraft;
 
 /// <summary>
-/// Provides a set of extension methods for working with <see cref="Task{Result}"/> objects.
+///     Provides a set of extension methods for working with <see cref="Task{Result}" /> objects.
 /// </summary>
 public static class ResultAsyncExtensions
 {
     /// <summary>
-    /// Asynchronously transforms the Result by applying either the 'success' or 'failure' function.
+    ///     Asynchronously transforms the Result by applying either the 'success' or 'failure' function.
     /// </summary>
     public static async Task<TOutput> MatchAsync<TError, TValue, TOutput>(
         this Task<Result<TError, TValue>> resultTask,
@@ -16,9 +16,9 @@ public static class ResultAsyncExtensions
         var result = await resultTask.ConfigureAwait(false);
         return result.Match(success, failure);
     }
-    
+
     /// <summary>
-    /// Asynchronously transforms the Result by applying either the 'success' or 'failure' function.
+    ///     Asynchronously transforms the Result by applying either the 'success' or 'failure' function.
     /// </summary>
     public static async Task<TOutput> MatchAsync<TError, TValue, TOutput>(
         this Task<Result<TError, TValue>> resultTask,
@@ -30,8 +30,8 @@ public static class ResultAsyncExtensions
     }
 
     /// <summary>
-    /// Asynchronously transforms the 'Success' value into a new type, keeping the 'Failure' error type the same.
-    /// If the Result is a 'Failure', it propagates the error.
+    ///     Asynchronously transforms the 'Success' value into a new type, keeping the 'Failure' error type the same.
+    ///     If the Result is a 'Failure', it propagates the error.
     /// </summary>
     public static async Task<Result<TError, TNewValue>> MapAsync<TError, TValue, TNewValue>(
         this Task<Result<TError, TValue>> resultTask,
@@ -42,8 +42,8 @@ public static class ResultAsyncExtensions
     }
 
     /// <summary>
-    /// Asynchronously transforms the 'Success' value into a new type, keeping the 'Failure' error type the same.
-    /// If the Result is a 'Failure', it propagates the error.
+    ///     Asynchronously transforms the 'Success' value into a new type, keeping the 'Failure' error type the same.
+    ///     If the Result is a 'Failure', it propagates the error.
     /// </summary>
     public static async Task<Result<TError, TNewValue>> MapAsync<TError, TValue, TNewValue>(
         this Task<Result<TError, TValue>> resultTask,
@@ -54,8 +54,32 @@ public static class ResultAsyncExtensions
     }
 
     /// <summary>
-    /// Asynchronously transforms the 'Failure' error into a new type, keeping the 'Success' value type the same.
-    /// If the Result is a 'Success', it propagates the value.
+    ///     Validates the success value and converts to Failure if the predicate returns false.
+    /// </summary>
+    public static async Task<Result<TError, TValue>> EnsureAsync<TError, TValue>(
+        this Task<Result<TError, TValue>> resultTask,
+        Func<TValue, bool> predicate,
+        TError error)
+    {
+        var result = await resultTask.ConfigureAwait(false);
+        return result.Ensure(predicate, error);
+    }
+
+    /// <summary>
+    ///     Validates the success value asynchronously and converts to Failure if the predicate returns false.
+    /// </summary>
+    public static async Task<Result<TError, TValue>> EnsureAsync<TError, TValue>(
+        this Task<Result<TError, TValue>> resultTask,
+        Func<TValue, Task<bool>> predicate,
+        TError error)
+    {
+        var result = await resultTask.ConfigureAwait(false);
+        return await result.EnsureAsync(predicate, error).ConfigureAwait(false);
+    }
+
+    /// <summary>
+    ///     Asynchronously transforms the 'Failure' error into a new type, keeping the 'Success' value type the same.
+    ///     If the Result is a 'Success', it propagates the value.
     /// </summary>
     public static async Task<Result<TNewError, TValue>> MapErrorAsync<TError, TValue, TNewError>(
         this Task<Result<TError, TValue>> resultTask,
@@ -66,8 +90,8 @@ public static class ResultAsyncExtensions
     }
 
     /// <summary>
-    /// Asynchronously transforms the 'Failure' error into a new type, keeping the 'Success' value type the same.
-    /// If the Result is a 'Success', it propagates the value.
+    ///     Asynchronously transforms the 'Failure' error into a new type, keeping the 'Success' value type the same.
+    ///     If the Result is a 'Success', it propagates the value.
     /// </summary>
     public static async Task<Result<TNewError, TValue>> MapErrorAsync<TError, TValue, TNewError>(
         this Task<Result<TError, TValue>> resultTask,
@@ -78,8 +102,8 @@ public static class ResultAsyncExtensions
     }
 
     /// <summary>
-    /// Asynchronously chains an operation that itself returns a Result.
-    /// If the current Result is a Failure, it propagates the error.
+    ///     Asynchronously chains an operation that itself returns a Result.
+    ///     If the current Result is a Failure, it propagates the error.
     /// </summary>
     public static async Task<Result<TError, TNewValue>> BindAsync<TError, TValue, TNewValue>(
         this Task<Result<TError, TValue>> resultTask,
@@ -90,8 +114,8 @@ public static class ResultAsyncExtensions
     }
 
     /// <summary>
-    /// Asynchronously chains an operation that itself returns a Result.
-    /// If the current Result is a Failure, it propagates the error.
+    ///     Asynchronously chains an operation that itself returns a Result.
+    ///     If the current Result is a Failure, it propagates the error.
     /// </summary>
     public static async Task<Result<TError, TNewValue>> BindAsync<TError, TValue, TNewValue>(
         this Task<Result<TError, TValue>> resultTask,
@@ -100,9 +124,31 @@ public static class ResultAsyncExtensions
         var result = await resultTask.ConfigureAwait(false);
         return await result.BindAsync(bindFunc).ConfigureAwait(false);
     }
-    
+
     /// <summary>
-    /// Asynchronously performs a side-effect action if the Result is a 'Success'.
+    ///     Converts a Failure into a Success using the provided recovery function.
+    /// </summary>
+    public static async Task<Result<TError, TValue>> RecoverAsync<TError, TValue>(
+        this Task<Result<TError, TValue>> resultTask,
+        Func<TError, TValue> recovery)
+    {
+        var result = await resultTask.ConfigureAwait(false);
+        return result.Recover(recovery);
+    }
+
+    /// <summary>
+    ///     Converts a Failure into a Success using an asynchronous recovery function.
+    /// </summary>
+    public static async Task<Result<TError, TValue>> RecoverAsync<TError, TValue>(
+        this Task<Result<TError, TValue>> resultTask,
+        Func<TError, Task<TValue>> recovery)
+    {
+        var result = await resultTask.ConfigureAwait(false);
+        return await result.RecoverAsync(recovery).ConfigureAwait(false);
+    }
+
+    /// <summary>
+    ///     Asynchronously performs a side-effect action if the Result is a 'Success'.
     /// </summary>
     /// <returns>The original, unchanged Result.</returns>
     public static async Task<Result<TError, TValue>> OnSuccessAsync<TError, TValue>(
@@ -112,9 +158,9 @@ public static class ResultAsyncExtensions
         var result = await resultTask.ConfigureAwait(false);
         return result.OnSuccess(action);
     }
-    
+
     /// <summary>
-    /// Asynchronously performs a side-effect action if the Result is a 'Success'.
+    ///     Asynchronously performs a side-effect action if the Result is a 'Success'.
     /// </summary>
     /// <returns>The original, unchanged Result.</returns>
     public static async Task<Result<TError, TValue>> OnSuccessAsync<TError, TValue>(
@@ -126,7 +172,7 @@ public static class ResultAsyncExtensions
     }
 
     /// <summary>
-    /// Performs a side-effect action if the Result is a 'Failure'.
+    ///     Performs a side-effect action if the Result is a 'Failure'.
     /// </summary>
     /// <returns>The original, unchanged Result.</returns>
     public static async Task<Result<TError, TValue>> OnFailureAsync<TError, TValue>(
@@ -138,7 +184,7 @@ public static class ResultAsyncExtensions
     }
 
     /// <summary>
-    /// Performs a side-effect action if the Result is a 'Failure'.
+    ///     Performs a side-effect action if the Result is a 'Failure'.
     /// </summary>
     /// <returns>The original, unchanged Result.</returns>
     public static async Task<Result<TError, TValue>> OnFailureAsync<TError, TValue>(
@@ -150,7 +196,7 @@ public static class ResultAsyncExtensions
     }
 
     /// <summary>
-    /// Asynchronously performs a side-effect action based on if the Result is either a 'Success' or 'Failure'.
+    ///     Asynchronously performs a side-effect action based on if the Result is either a 'Success' or 'Failure'.
     /// </summary>
     /// <returns>The original, unchanged Result.</returns>
     public static async Task<Result<TError, TValue>> SwitchAsync<TError, TValue>(
@@ -163,7 +209,7 @@ public static class ResultAsyncExtensions
     }
 
     /// <summary>
-    /// Asynchronously performs a side-effect action based on if the Result is either a 'Success' or 'Failure'.
+    ///     Asynchronously performs a side-effect action based on if the Result is either a 'Success' or 'Failure'.
     /// </summary>
     /// <returns>The original, unchanged Result.</returns>
     public static async Task<Result<TError, TValue>> SwitchAsync<TError, TValue>(
@@ -176,7 +222,7 @@ public static class ResultAsyncExtensions
     }
 
     /// <summary>
-    /// Asynchronously performs a side-effect action based on if the Result is either a 'Success' or 'Failure'.
+    ///     Asynchronously performs a side-effect action based on if the Result is either a 'Success' or 'Failure'.
     /// </summary>
     /// <returns>The original, unchanged Result.</returns>
     public static async Task<Result<TError, TValue>> SwitchAsync<TError, TValue>(
@@ -189,7 +235,7 @@ public static class ResultAsyncExtensions
     }
 
     /// <summary>
-    /// Asynchronously performs a side-effect action based on if the Result is either a 'Success' or 'Failure'.
+    ///     Asynchronously performs a side-effect action based on if the Result is either a 'Success' or 'Failure'.
     /// </summary>
     /// <returns>The original, unchanged Result.</returns>
     public static async Task<Result<TError, TValue>> SwitchAsync<TError, TValue>(
@@ -199,5 +245,15 @@ public static class ResultAsyncExtensions
     {
         var result = await resultTask.ConfigureAwait(false);
         return await result.SwitchAsync(onSuccess, onFailure).ConfigureAwait(false);
+    }
+
+    /// <summary>
+    ///     Converts the Result to an Option that is Some when Success and None when Failure.
+    /// </summary>
+    public static async Task<Optional<TValue>> ToOptionalAsync<TError, TValue>(
+        this Task<Result<TError, TValue>> resultTask)
+    {
+        var result = await resultTask.ConfigureAwait(false);
+        return result.ToOptional();
     }
 }
