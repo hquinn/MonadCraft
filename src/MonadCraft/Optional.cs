@@ -301,6 +301,70 @@ public readonly record struct Optional<TValue>
             : Result<TError, TValue>.Failure(errorFactory());
     }
 
+    // ValueTask-based async methods (use "ValueAsync" suffix to avoid overload ambiguity)
+
+    /// <summary>
+    ///     Asynchronously transforms the Option by applying either the 'some' or 'none' function using ValueTask.
+    /// </summary>
+    public async ValueTask<TOutput> MatchValueAsync<TOutput>(Func<TValue, ValueTask<TOutput>> some, Func<ValueTask<TOutput>> none)
+    {
+        return IsSome
+            ? await some(Value).ConfigureAwait(false)
+            : await none().ConfigureAwait(false);
+    }
+
+    /// <summary>
+    ///     Asynchronously transforms the contained value using a ValueTask-returning function.
+    /// </summary>
+    public async ValueTask<Optional<TNewValue>> MapValueAsync<TNewValue>(Func<TValue, ValueTask<TNewValue>> mapFunc)
+    {
+        return IsSome
+            ? new Optional<TNewValue>(await mapFunc(Value).ConfigureAwait(false))
+            : Optional<TNewValue>.None;
+    }
+
+    /// <summary>
+    ///     Asynchronously chains an operation that itself returns a ValueTask of an Option.
+    /// </summary>
+    public async ValueTask<Optional<TNewValue>> BindValueAsync<TNewValue>(Func<TValue, ValueTask<Optional<TNewValue>>> bindFunc)
+    {
+        return IsSome
+            ? await bindFunc(Value).ConfigureAwait(false)
+            : Optional<TNewValue>.None;
+    }
+
+    /// <summary>
+    ///     Asynchronously performs a side-effect action if the Option is Some using ValueTask.
+    /// </summary>
+    public async ValueTask<Optional<TValue>> OnSomeValueAsync(Func<TValue, ValueTask> action)
+    {
+        if (IsSome) await action(Value).ConfigureAwait(false);
+
+        return this;
+    }
+
+    /// <summary>
+    ///     Asynchronously performs a side-effect action if the Option is None using ValueTask.
+    /// </summary>
+    public async ValueTask<Optional<TValue>> OnNoneValueAsync(Func<ValueTask> action)
+    {
+        if (IsNone) await action().ConfigureAwait(false);
+
+        return this;
+    }
+
+    /// <summary>
+    ///     Asynchronously filters the Option based on an async predicate using ValueTask.
+    /// </summary>
+    public async ValueTask<Optional<TValue>> WhereValueAsync(Func<TValue, ValueTask<bool>> predicate)
+    {
+        if (!IsSome) return None;
+
+        return await predicate(Value).ConfigureAwait(false)
+            ? this
+            : None;
+    }
+
     // Implicit operators for convenience
     public static implicit operator Optional<TValue>(TValue? value)
     {

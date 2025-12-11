@@ -419,6 +419,133 @@ public readonly record struct Result<TError, TValue>
             : Optional<TValue>.None;
     }
 
+    // ValueTask-based async methods (use "ValueAsync" suffix to avoid overload ambiguity)
+
+    /// <summary>
+    ///     Asynchronously transforms the Result by applying either the 'success' or 'failure' function using ValueTask.
+    /// </summary>
+    public async ValueTask<TOutput> MatchValueAsync<TOutput>(
+        Func<TValue, ValueTask<TOutput>> success,
+        Func<TError, ValueTask<TOutput>> failure)
+    {
+        return IsSuccess
+            ? await success(Value).ConfigureAwait(false)
+            : await failure(Error).ConfigureAwait(false);
+    }
+
+    /// <summary>
+    ///     Asynchronously transforms the 'Success' value using a ValueTask-returning function.
+    /// </summary>
+    public async ValueTask<Result<TError, TNewValue>> MapValueAsync<TNewValue>(Func<TValue, ValueTask<TNewValue>> mapFunc)
+    {
+        return IsSuccess
+            ? new Result<TError, TNewValue>(await mapFunc(Value).ConfigureAwait(false))
+            : new Result<TError, TNewValue>(Error);
+    }
+
+    /// <summary>
+    ///     Validates the success value asynchronously using ValueTask and converts to Failure if the predicate returns false.
+    /// </summary>
+    public async ValueTask<Result<TError, TValue>> EnsureValueAsync(Func<TValue, ValueTask<bool>> predicate, TError error)
+    {
+        if (IsFailure) return this;
+
+        var isValid = await predicate(Value).ConfigureAwait(false);
+        return isValid
+            ? this
+            : new Result<TError, TValue>(error);
+    }
+
+    /// <summary>
+    ///     Asynchronously transforms the 'Failure' error using a ValueTask-returning function.
+    /// </summary>
+    public async ValueTask<Result<TNewError, TValue>> MapErrorValueAsync<TNewError>(Func<TError, ValueTask<TNewError>> mapFunc)
+    {
+        return IsSuccess
+            ? new Result<TNewError, TValue>(Value)
+            : new Result<TNewError, TValue>(await mapFunc(Error).ConfigureAwait(false));
+    }
+
+    /// <summary>
+    ///     Asynchronously chains an operation that itself returns a ValueTask of a Result.
+    /// </summary>
+    public async ValueTask<Result<TError, TNewValue>> BindValueAsync<TNewValue>(
+        Func<TValue, ValueTask<Result<TError, TNewValue>>> bindFunc)
+    {
+        return IsSuccess
+            ? await bindFunc(Value).ConfigureAwait(false)
+            : new Result<TError, TNewValue>(Error);
+    }
+
+    /// <summary>
+    ///     Converts a Failure into a Success using an asynchronous ValueTask recovery function.
+    /// </summary>
+    public async ValueTask<Result<TError, TValue>> RecoverValueAsync(Func<TError, ValueTask<TValue>> recovery)
+    {
+        return IsSuccess
+            ? this
+            : new Result<TError, TValue>(await recovery(Error).ConfigureAwait(false));
+    }
+
+    /// <summary>
+    ///     Asynchronously performs a side-effect action if the Result is a 'Success' using ValueTask.
+    /// </summary>
+    public async ValueTask<Result<TError, TValue>> OnSuccessValueAsync(Func<TValue, ValueTask> action)
+    {
+        if (IsSuccess) await action(Value).ConfigureAwait(false);
+
+        return this;
+    }
+
+    /// <summary>
+    ///     Asynchronously performs a side-effect action if the Result is a 'Failure' using ValueTask.
+    /// </summary>
+    public async ValueTask<Result<TError, TValue>> OnFailureValueAsync(Func<TError, ValueTask> action)
+    {
+        if (IsFailure) await action(Error).ConfigureAwait(false);
+
+        return this;
+    }
+
+    /// <summary>
+    ///     Asynchronously performs a side-effect action based on if the Result is either a 'Success' or 'Failure' using ValueTask.
+    /// </summary>
+    public async ValueTask<Result<TError, TValue>> SwitchValueAsync(Func<TValue, ValueTask> onSuccess, Func<TError, ValueTask> onFailure)
+    {
+        if (IsSuccess)
+            await onSuccess(Value).ConfigureAwait(false);
+        else
+            await onFailure(Error).ConfigureAwait(false);
+
+        return this;
+    }
+
+    /// <summary>
+    ///     Asynchronously performs a side-effect action based on if the Result is either a 'Success' or 'Failure' using ValueTask.
+    /// </summary>
+    public async ValueTask<Result<TError, TValue>> SwitchValueAsync(Action<TValue> onSuccess, Func<TError, ValueTask> onFailure)
+    {
+        if (IsSuccess)
+            onSuccess(Value);
+        else
+            await onFailure(Error).ConfigureAwait(false);
+
+        return this;
+    }
+
+    /// <summary>
+    ///     Asynchronously performs a side-effect action based on if the Result is either a 'Success' or 'Failure' using ValueTask.
+    /// </summary>
+    public async ValueTask<Result<TError, TValue>> SwitchValueAsync(Func<TValue, ValueTask> onSuccess, Action<TError> onFailure)
+    {
+        if (IsSuccess)
+            await onSuccess(Value).ConfigureAwait(false);
+        else
+            onFailure(Error);
+
+        return this;
+    }
+
     /// <summary>
     ///     Creates a new 'Success' Result.
     /// </summary>
