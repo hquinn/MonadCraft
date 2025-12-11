@@ -8,8 +8,6 @@ Lightweight `Optional` and `Result` types with async helpers, LINQ support, and 
 dotnet add package MonadCraft
 ```
 
-Targets: `net10.0` (and compatible lower TFMs via NuGet dependency resolution).
-
 ## Quickstart
 
 ### Optional
